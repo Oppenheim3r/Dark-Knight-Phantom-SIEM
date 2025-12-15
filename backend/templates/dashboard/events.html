@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Events - Dark Knight Phantom SIEM{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Security Events</h1>
+        <p class="page-subtitle">Browse and analyze Windows security events</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 12px; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Event ID</label>
+                <input type="text" class="form-input" id="filter-event-id" placeholder="e.g., 4624">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Hostname</label>
+                <input type="text" class="form-input" id="filter-hostname" placeholder="Hostname">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Channel</label>
+                <select class="form-select" id="filter-channel">
+                    <option value="">All</option>
+                    <option value="Security">Security</option>
+                    <option value="System">System</option>
+                    <option value="Application">Application</option>
+                    <option value="Microsoft-Windows-Sysmon/Operational">Sysmon</option>
+                    <option value="Microsoft-Windows-PowerShell/Operational">PowerShell</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Time Range</label>
+                <select class="form-select" id="filter-time">
+                    <option value="1">Last Hour</option>
+                    <option value="6">Last 6 Hours</option>
+                    <option value="24" selected>Last 24 Hours</option>
+                    <option value="168">Last 7 Days</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="loadEvents()">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Events Table -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Events <span id="event-count" style="color: var(--text-muted); font-weight: normal;"></span></h3>
+        <button class="btn btn-secondary" onclick="loadEvents()">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 150px;">Timestamp</th>
+                    <th style="width: 80px;">Event ID</th>
+                    <th>Hostname</th>
+                    <th>Channel</th>
+                    <th>User</th>
+                    <th>Message</th>
+                </tr>
+            </thead>
+            <tbody id="events-table">
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                        <div class="loading-spinner"></div>
+                        <p style="margin-top: 10px;">Loading events...</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Event Details Modal is now in base.html (global component) -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function loadEvents() {
+        const tbody = document.getElementById('events-table');
+        if (!tbody) {
+            console.error('Events table not found');
+            return;
+        }
+        
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);"><div class="loading-spinner"></div></td></tr>';
+        
+        // Build query params
+        const params = new URLSearchParams();
+        
+        const eventId = document.getElementById('filter-event-id')?.value;
+        if (eventId) params.append('event_id', eventId);
+        
+        const hostname = document.getElementById('filter-hostname')?.value;
+        if (hostname) params.append('hostname__icontains', hostname);
+        
+        const channel = document.getElementById('filter-channel')?.value;
+        if (channel) params.append('channel', channel);
+        
+        const hours = document.getElementById('filter-time')?.value || 24;
+        const since = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+        params.append('timestamp__gte', since);
+        
+        // Add limit to get more results
+        params.append('limit', '500');
+        
+        try {
+            const response = await fetch(`${API_BASE}/events/list/?${params.toString()}`);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 200)}`);
+            }
+            
+            const data = await response.json();
+            
+            // Handle paginated response (DRF default) or direct array
+            const events = Array.isArray(data) ? data : (data.results || data);
+            const totalCount = data.count || events.length;
+            
+            document.getElementById('event-count').textContent = `(${totalCount} events)`;
+            
+            if (!events || events.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No events found</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            events.forEach(event => {
+                if (!event || !event.id) {
+                    console.warn('Invalid event data:', event);
+                    return;
+                }
+                
+                const timestamp = new Date(event.timestamp).toLocaleString();
+                const message = (event.message || '').substring(0, 100);
+                
+                html += `
+                    <tr onclick="showEventDetails(${event.id})" style="cursor: pointer;">
+                        <td style="font-family: monospace; font-size: 12px;">${timestamp}</td>
+                        <td><code>${event.event_id || '-'}</code></td>
+                        <td>${escapeHtml(event.hostname || '-')}</td>
+                        <td style="font-size: 12px;">${escapeHtml(event.channel || '-')}</td>
+                        <td>${escapeHtml(event.user_name || '-')}</td>
+                        <td style="font-size: 12px; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(message || '-')}</td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Error loading events:', error);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--status-critical);">
+                        <strong>Error loading events</strong><br>
+                        <span style="font-size: 11px; color: var(--text-muted);">${escapeHtml(error.message)}</span>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+    
+    // showEventDetails and closeEventModal are now in phantom-core.js (global)
+    
+    // Utility function for escaping HTML
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Load events on page load
+    document.addEventListener('DOMContentLoaded', loadEvents);
+</script>
+{% endblock %}
+

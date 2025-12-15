@@ -1,0 +1,62 @@
+<!-- Global Event Detail Modal - Reusable across all pages -->
+<div id="event-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-scroll"></i> Event Details
+            </h2>
+            <button class="modal-close" onclick="closeEventModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="event-modal-body">
+            <div style="text-align: center; padding: 40px;">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 10px; color: var(--text-muted);">Loading event details...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Detail Modal -->
+<div id="alert-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-container modal-large">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-bell"></i> Alert Details
+            </h2>
+            <button class="modal-close" onclick="closeAlertModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="alert-modal-body">
+            <div style="text-align: center; padding: 40px;">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 10px; color: var(--text-muted);">Loading alert details...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Agent Detail Modal -->
+<div id="agent-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-container modal-large">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-robot"></i> Agent Details
+            </h2>
+            <button class="modal-close" onclick="closeAgentModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="agent-modal-body">
+            <div style="text-align: center; padding: 40px;">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 10px; color: var(--text-muted);">Loading agent details...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

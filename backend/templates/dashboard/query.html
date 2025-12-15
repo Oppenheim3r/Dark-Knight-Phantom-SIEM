@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}PQL Query - Dark Knight Phantom SIEM{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">PQL Query Console</h1>
+        <p class="page-subtitle">Phantom Query Language for security analysis</p>
+    </div>
+</div>
+
+<!-- Query Editor -->
+<div class="card" style="margin-bottom: 20px;">
+    <div class="query-editor">
+        <div class="query-editor-header">
+            <span style="color: var(--accent-cyan);">
+                <i class="fas fa-terminal"></i> PQL Query
+            </span>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" onclick="clearQuery()">
+                    <i class="fas fa-eraser"></i> Clear
+                </button>
+                <button class="btn btn-primary" onclick="executeQuery()">
+                    <i class="fas fa-play"></i> Execute
+                </button>
+            </div>
+        </div>
+        <textarea class="query-input" id="query-input" placeholder="SEARCH events WHERE event_id = 4625 ORDER BY timestamp DESC LIMIT 100"></textarea>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="card" id="results-card" style="display: none;">
+    <div class="card-header">
+        <h3 class="card-title">Results <span id="result-count" style="color: var(--text-muted); font-weight: normal;"></span></h3>
+        <span id="execution-time" style="color: var(--accent-cyan); font-size: 12px;"></span>
+    </div>
+    <div class="card-body" style="padding: 0; overflow-x: auto;">
+        <div id="results-container">
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function setQuery(query) {
+        document.getElementById('query-input').value = query;
+    }
+    
+    function clearQuery() {
+        document.getElementById('query-input').value = '';
+        document.getElementById('results-card').style.display = 'none';
+    }
+    
+    async function executeQuery() {
+        const query = document.getElementById('query-input').value.trim();
+        if (!query) {
+            alert('Please enter a query');
+            return;
+        }
+        
+        const resultsCard = document.getElementById('results-card');
+        const resultsContainer = document.getElementById('results-container');
+        
+        resultsCard.style.display = 'block';
+        resultsContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading-spinner"></div><p style="margin-top: 10px; color: var(--text-muted);">Executing query...</p></div>';
+        
+        try {
+            const response = await fetch(`${API_BASE}/query/execute/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'error') {
+                resultsContainer.innerHTML = `
+                    <div style="padding: 20px; color: var(--status-critical);">
+                        <strong>Error:</strong> ${data.message}
+                    </div>
+                `;
+                return;
+            }
+            
+            document.getElementById('result-count').textContent = `(${data.result_count} results)`;
+            document.getElementById('execution-time').textContent = `Executed in ${data.execution_time_ms}ms`;
+            
+            if (!data.results || data.results.length === 0) {
+                resultsContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No results found</div>';
+                return;
+            }
+            
+            // Build results table
+            const results = data.results;
+            // Include message field but exclude very large fields from table display
+            const columns = Object.keys(results[0]).filter(k => 
+                !k.startsWith('_') && 
+                k !== 'raw_xml' && 
+                k !== 'full_text' &&
+                k !== 'event_data' // Exclude event_data from table (shown in modal)
+            );
+            
+            // Prioritize important columns
+            const priorityColumns = ['id', 'event_id', 'timestamp', 'severity', 'hostname', 'channel', 'message', 'user_name', 'source_ip', 'process_name', 'command_line'];
+            const orderedColumns = [
+                ...priorityColumns.filter(c => columns.includes(c)),
+                ...columns.filter(c => !priorityColumns.includes(c))
+            ];
+            
+            let html = '<table class="data-table"><thead><tr>';
+            orderedColumns.forEach(col => {
+                html += `<th>${col}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            results.forEach(row => {
+                // Check if this row has an 'id' field (it's an event)
+                const eventId = row.id || row._id;
+                // Make entire row clickable to show full event details
+                const clickHandler = eventId ? `onclick="showEventDetails(${eventId})" style="cursor: pointer;" title="Click to view full event details"` : '';
+                html += `<tr ${clickHandler}>`;
+                orderedColumns.forEach(col => {
+                    let value = row[col];
+                    if (value === null || value === undefined) value = '-';
+                    if (typeof value === 'object') value = JSON.stringify(value).substring(0, 100);
+                    // For message field, show more characters
+                    if (col === 'message' && typeof value === 'string' && value.length > 100) {
+                        value = value.substring(0, 100) + '...';
+                    } else if (typeof value === 'string' && value.length > 80) {
+                        value = value.substring(0, 80) + '...';
+                    }
+                    // Make certain fields clickable for pivot search (but don't interfere with row click)
+                    let cellClass = '';
+                    let cellStyle = 'font-size: 12px;';
+                    if (col === 'hostname' && value !== '-') {
+                        cellClass = `onclick="event.stopPropagation(); if(typeof pivotSearch === 'function') pivotSearch('hostname', '${String(value).replace(/'/g, "\\'")}')"`;
+                        cellStyle += ' cursor: pointer; color: var(--accent-purple); text-decoration: underline;';
+                    } else if (col === 'user_name' && value !== '-') {
+                        cellClass = `onclick="event.stopPropagation(); if(typeof pivotSearch === 'function') pivotSearch('user_name', '${String(value).replace(/'/g, "\\'")}')"`;
+                        cellStyle += ' cursor: pointer; color: var(--accent-purple); text-decoration: underline;';
+                    } else if (col === 'source_ip' && value !== '-') {
+                        cellClass = `onclick="event.stopPropagation(); if(typeof pivotSearch === 'function') pivotSearch('source_ip', '${String(value).replace(/'/g, "\\'")}')"`;
+                        cellStyle += ' cursor: pointer; color: var(--accent-purple); text-decoration: underline;';
+                    }
+                    html += `<td style="${cellStyle}" ${cellClass}>${escapeHtml(String(value))}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            resultsContainer.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Query error:', error);
+            resultsContainer.innerHTML = `
+                <div style="padding: 20px; color: var(--status-critical);">
+                    <strong>Error:</strong> ${error.message}
+                </div>
+            `;
+        }
+    }
+    
+    // Execute on Ctrl+Enter
+    document.getElementById('query-input').addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+            executeQuery();
+        }
+    });
+    
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Helper functions for pivot search (if not already defined in phantom-core.js)
+    if (typeof pivotSearch === 'undefined') {
+        function pivotSearch(field, value) {
+            const query = `SEARCH events WHERE ${field} = '${value.replace(/'/g, "\\'")}' LIMIT 100`;
+            setQuery(query);
+            executeQuery();
+        }
+    }
+    
+    if (typeof runPQLQuery === 'undefined') {
+        function runPQLQuery(query) {
+            setQuery(query);
+            executeQuery();
+        }
+    }
+</script>
+{% endblock %}
+

@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Dark Knight Phantom SIEM{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Security Dashboard</h1>
+        <p class="page-subtitle">Real-time security monitoring and analytics</p>
+    </div>
+    <div>
+        <button class="btn btn-secondary" onclick="refreshDashboard()">
+            <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid" style="grid-template-columns: repeat(6, 1fr);">
+    <div class="stat-card info" onclick="window.location.href='/events/'" style="cursor: pointer;">
+        <div class="stat-header">
+            <div class="stat-icon blue">
+                <i class="fas fa-scroll"></i>
+            </div>
+        </div>
+        <div class="stat-value" id="total-events">-</div>
+        <div class="stat-label">Total Events (24h)</div>
+    </div>
+    
+    <div class="stat-card critical" onclick="window.location.href='/events/?severity=CRITICAL'" style="cursor: pointer;">
+        <div class="stat-header">
+            <div class="stat-icon red">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+        </div>
+        <div class="stat-value" id="critical-events">-</div>
+        <div class="stat-label">Critical</div>
+    </div>
+    
+    <div class="stat-card warning" onclick="window.location.href='/events/?severity=HIGH'" style="cursor: pointer;">
+        <div class="stat-header">
+            <div class="stat-icon orange">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+        </div>
+        <div class="stat-value" id="high-events">-</div>
+        <div class="stat-label">High</div>
+    </div>
+    
+    <div class="stat-card" onclick="window.location.href='/events/?severity=MEDIUM'" style="cursor: pointer;">
+        <div class="stat-header">
+            <div class="stat-icon yellow">
+                <i class="fas fa-info-circle"></i>
+            </div>
+        </div>
+        <div class="stat-value" id="medium-events">-</div>
+        <div class="stat-label">Medium</div>
+    </div>
+    
+    <div class="stat-card warning" onclick="window.location.href='/alerts/?status=NEW'" style="cursor: pointer;">
+        <div class="stat-header">
+            <div class="stat-icon purple">
+                <i class="fas fa-bell"></i>
+            </div>
+        </div>
+        <div class="stat-value" id="active-alerts">-</div>
+        <div class="stat-label">Active Alerts</div>
+    </div>
+    
+    <div class="stat-card success" onclick="window.location.href='/agents/?status=ONLINE'" style="cursor: pointer;">
+        <div class="stat-header">
+            <div class="stat-icon green">
+                <i class="fas fa-robot"></i>
+            </div>
+        </div>
+        <div class="stat-value" id="online-agents">-</div>
+        <div class="stat-label">Online Agents</div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px;">
+    <!-- Events Timeline Chart -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Events Timeline</h3>
+            <select class="form-select" style="width: auto;" id="timeline-period">
+                <option value="24">Last 24 Hours</option>
+                <option value="12">Last 12 Hours</option>
+                <option value="6">Last 6 Hours</option>
+            </select>
+        </div>
+        <div class="card-body">
+            <div class="chart-container">
+                <canvas id="eventsChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Severity Distribution -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Severity Distribution</h3>
+        </div>
+        <div class="card-body">
+            <div class="chart-container">
+                <canvas id="severityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Tables Row -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- Top Event IDs -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Top Event IDs</h3>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Event ID</th>
+                        <th>Count</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="top-events-table">
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: var(--text-muted);">
+                            <div class="loading-spinner"></div> Loading...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Top Hosts -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Top Hosts by Events</h3>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Hostname</th>
+                        <th>Events</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="top-hosts-table">
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: var(--text-muted);">
+                            <div class="loading-spinner"></div> Loading...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Event ID descriptions
+    const eventDescriptions = {
+        4624: 'Successful Logon',
+        4625: 'Failed Logon',
+        4634: 'Logoff',
+        4648: 'Explicit Credential Logon',
+        4672: 'Special Privileges Assigned',
+        4688: 'Process Creation',
+        4689: 'Process Termination',
+        4697: 'Service Installed',
+        4698: 'Scheduled Task Created',
+        4720: 'User Account Created',
+        4728: 'Member Added to Security Group',
+        4732: 'Member Added to Local Group',
+        4768: 'Kerberos TGT Requested',
+        4769: 'Kerberos Service Ticket',
+        4776: 'NTLM Credential Validation',
+        5140: 'Network Share Accessed',
+        7045: 'New Service Installed',
+    };
+    
+    let eventsChart, severityChart;
+    
+    // Initialize charts
+    function initCharts() {
+        const eventsCtx = document.getElementById('eventsChart').getContext('2d');
+        eventsChart = new Chart(eventsCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Events',
+                    data: [],
+                    borderColor: '#6c5ce7',
+                    backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(45, 45, 68, 0.5)'
+                        },
+                        ticks: {
+                            color: '#a0a0b8'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(45, 45, 68, 0.5)'
+                        },
+                        ticks: {
+                            color: '#a0a0b8'
+                        }
+                    }
+                }
+            }
+        });
+        
+        const severityCtx = document.getElementById('severityChart').getContext('2d');
+        severityChart = new Chart(severityCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Critical', 'High', 'Medium', 'Low', 'Info'],
+                datasets: [{
+                    data: [0, 0, 0, 0, 0],
+                    backgroundColor: [
+                        '#ff4757',
+                        '#ff6b6b',
+                        '#ffa502',
+                        '#7bed9f',
+                        '#70a1ff'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#a0a0b8',
+                            padding: 15
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+    
+    // Fetch and update dashboard data
+    async function refreshDashboard() {
+        try {
+            const response = await fetch(`${API_BASE}/dashboard/stats/?hours=24`);
+            const data = await response.json();
+            
+            // Update stat cards - ensure we get correct severity counts
+            const events = data.events || {};
+            const severity = events.by_severity || {};
+            
+            document.getElementById('total-events').textContent = (events.total || 0).toLocaleString();
+            document.getElementById('critical-events').textContent = (severity.CRITICAL || 0).toLocaleString();
+            document.getElementById('high-events').textContent = (severity.HIGH || 0).toLocaleString();
+            document.getElementById('medium-events').textContent = (severity.MEDIUM || 0).toLocaleString();
+            document.getElementById('active-alerts').textContent = (data.alerts?.new || 0).toLocaleString();
+            document.getElementById('online-agents').textContent = `${data.agents?.online || 0}/${data.agents?.total || 0}`;
+            
+            // Debug log to verify data
+            console.log('Dashboard data:', {
+                total: events.total,
+                severity: severity,
+                alerts: data.alerts,
+                agents: data.agents
+            });
+            
+            // Update severity chart
+            severityChart.data.datasets[0].data = [
+                data.events?.by_severity?.CRITICAL || 0,
+                data.events?.by_severity?.HIGH || 0,
+                data.events?.by_severity?.MEDIUM || 0,
+                data.events?.by_severity?.LOW || 0,
+                data.events?.by_severity?.INFO || 0
+            ];
+            severityChart.update();
+            
+            // Update timeline chart
+            if (data.events_timeline) {
+                eventsChart.data.labels = data.events_timeline.map(t => {
+                    const d = new Date(t.hour);
+                    return d.getHours() + ':00';
+                });
+                eventsChart.data.datasets[0].data = data.events_timeline.map(t => t.count);
+                eventsChart.update();
+            }
+            
+            // Update top events table - make clickable
+            let eventsHtml = '';
+            if (data.top_event_ids && data.top_event_ids.length > 0) {
+                data.top_event_ids.forEach(event => {
+                    eventsHtml += `
+                        <tr onclick="window.location.href='/events/?event_id=${event.event_id}'" style="cursor: pointer;">
+                            <td><code>${event.event_id}</code></td>
+                            <td>${event.count.toLocaleString()}</td>
+                            <td>${eventDescriptions[event.event_id] || 'Windows Event'}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                eventsHtml = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No events yet</td></tr>';
+            }
+            document.getElementById('top-events-table').innerHTML = eventsHtml;
+            
+            // Update top hosts table - make clickable
+            let hostsHtml = '';
+            if (data.top_hosts && data.top_hosts.length > 0) {
+                data.top_hosts.forEach(host => {
+                    hostsHtml += `
+                        <tr onclick="window.location.href='/events/?hostname=${encodeURIComponent(host.hostname)}'" style="cursor: pointer;">
+                            <td><i class="fas fa-desktop" style="color: var(--accent-purple); margin-right: 8px;"></i>${host.hostname}</td>
+                            <td>${host.count.toLocaleString()}</td>
+                            <td><span class="status-dot online"></span>Active</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                hostsHtml = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No hosts reporting</td></tr>';
+            }
+            document.getElementById('top-hosts-table').innerHTML = hostsHtml;
+            
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+        }
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        initCharts();
+        refreshDashboard();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(refreshDashboard, 30000);
+    });
+</script>
+{% endblock %}
+

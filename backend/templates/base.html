@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dark Knight Phantom SIEM{% endblock %}</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/phantom.css">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Include Global Modals -->
+    {% include 'components/event_modal.html' %}
+    
+    <div class="app-container">
+        <!-- Top Navigation Bar -->
+        <header class="top-navbar">
+            <div class="navbar-brand">
+                <div class="brand-text">
+                    <h1>DARK KNIGHT</h1>
+                    <span>Phantom SIEM</span>
+                </div>
+            </div>
+            
+            <nav class="top-nav-menu">
+                <a href="/events/" class="top-nav-item {% if '/events/' in request.path %}active{% endif %}">
+                    <i class="fas fa-scroll"></i>
+                    <span>Events</span>
+                </a>
+                <a href="/alerts/" class="top-nav-item {% if '/alerts/' in request.path %}active{% endif %}">
+                    <i class="fas fa-bell"></i>
+                    <span>Alerts</span>
+                    <span class="nav-badge" id="alert-count">0</span>
+                </a>
+                <a href="/query/" class="top-nav-item {% if '/query/' in request.path %}active{% endif %}">
+                    <i class="fas fa-terminal"></i>
+                    <span>PQL Query</span>
+                </a>
+                <a href="/agents/" class="top-nav-item {% if '/agents/' in request.path %}active{% endif %}">
+                    <i class="fas fa-robot"></i>
+                    <span>Agents</span>
+                </a>
+                <a href="/doc/" class="top-nav-item {% if '/doc/' in request.path %}active{% endif %}">
+                    <i class="fas fa-book"></i>
+                    <span>Documentation</span>
+                </a>
+            </nav>
+            
+            <div class="navbar-status">
+                <i class="fas fa-circle" style="color: var(--status-low); font-size: 8px;"></i>
+                <span style="font-size: 11px; color: var(--text-muted);">System Online</span>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    
+    <!-- Core JavaScript -->
+    <script src="/static/js/phantom-core.js"></script>
+    
+    <script>
+        // Base API URL (also defined in phantom-core.js, but keep for compatibility)
+        const API_BASE = '/api/v1';
+        
+        // Fetch alert count
+        async function updateAlertCount() {
+            try {
+                const response = await fetch(`${API_BASE}/detection/alerts/?status=NEW`);
+                const data = await response.json();
+                const count = data.count || data.results?.length || 0;
+                const alertBadge = document.getElementById('alert-count');
+                if (alertBadge) {
+                    alertBadge.textContent = count;
+                }
+            } catch (error) {
+                console.error('Error fetching alert count:', error);
+            }
+        }
+        
+        // Update alert count every 30 seconds
+        updateAlertCount();
+        setInterval(updateAlertCount, 30000);
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

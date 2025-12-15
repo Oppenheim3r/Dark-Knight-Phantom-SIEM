@@ -1,0 +1,952 @@
+{% extends 'base.html' %}
+
+{% block title %}Documentation - Dark Knight Phantom SIEM{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Documentation</h1>
+        <p class="page-subtitle">Complete guide to Dark Knight Phantom SIEM</p>
+    </div>
+</div>
+
+<div style="max-width: 1200px; margin: 0 auto;">
+    <!-- Table of Contents -->
+    <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <h3 class="card-title">Table of Contents</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px;">
+                <a href="#overview" style="color: var(--accent-purple); text-decoration: none; padding: 8px; border-left: 3px solid var(--accent-purple);">
+                    <strong>1. Overview</strong>
+                </a>
+                <a href="#features" style="color: var(--accent-purple); text-decoration: none; padding: 8px; border-left: 3px solid var(--accent-purple);">
+                    <strong>2. Features</strong>
+                </a>
+                <a href="#event-channels" style="color: var(--accent-purple); text-decoration: none; padding: 8px; border-left: 3px solid var(--accent-purple);">
+                    <strong>3. Event Channels</strong>
+                </a>
+                <a href="#event-ids" style="color: var(--accent-purple); text-decoration: none; padding: 8px; border-left: 3px solid var(--accent-purple);">
+                    <strong>4. Event IDs</strong>
+                </a>
+                <a href="#pql" style="color: var(--accent-purple); text-decoration: none; padding: 8px; border-left: 3px solid var(--accent-purple);">
+                    <strong>5. PQL Query Language</strong>
+                </a>
+                <a href="#detection" style="color: var(--accent-purple); text-decoration: none; padding: 8px; border-left: 3px solid var(--accent-purple);">
+                    <strong>6. Detection Rules</strong>
+                </a>
+                <a href="#api" style="color: var(--accent-purple); text-decoration: none; padding: 8px; border-left: 3px solid var(--accent-purple);">
+                    <strong>7. API Endpoints</strong>
+                </a>
+                <a href="#configuration" style="color: var(--accent-purple); text-decoration: none; padding: 8px; border-left: 3px solid var(--accent-purple);">
+                    <strong>8. Configuration</strong>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <div id="overview" class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <h2 class="card-title">1. Overview</h2>
+        </div>
+        <div class="card-body">
+            <p style="font-size: 16px; line-height: 1.8; color: var(--text-secondary);">
+                <strong>Dark Knight Phantom SIEM</strong> is a comprehensive Security Information and Event Management (SIEM) system 
+                designed for Windows environments. It provides real-time event collection, advanced threat detection, and powerful 
+                query capabilities for security analysis.
+            </p>
+            
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Architecture</h3>
+            <ul style="line-height: 1.8; color: var(--text-secondary);">
+                <li><strong>Agent-Based Collection:</strong> Lightweight C# agents deployed on Windows endpoints</li>
+                <li><strong>Django Backend:</strong> Python-based server for event processing and storage</li>
+                <li><strong>PostgreSQL Database:</strong> Scalable data storage with full event retention</li>
+                <li><strong>Real-Time Detection:</strong> Behavioral analysis and pattern matching</li>
+                <li><strong>Web Interface:</strong> Modern, responsive UI for analysis and management</li>
+            </ul>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Key Capabilities</h3>
+            <ul style="line-height: 1.8; color: var(--text-secondary);">
+                <li>Collects events from 36+ Windows Event Log channels</li>
+                <li>Monitors 100+ critical security event IDs</li>
+                <li>Detects authentication attacks, privilege escalation, lateral movement, and more</li>
+                <li>Custom PQL (Phantom Query Language) for advanced analysis</li>
+                <li>MITRE ATT&CK framework mapping</li>
+                <li>Entity tracking and behavioral analysis</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div id="features" class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <h2 class="card-title">2. Features</h2>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div>
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 12px;">
+                        <i class="fas fa-scroll"></i> Event Collection
+                    </h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary);">
+                        <li>Real-time Windows Event Log collection</li>
+                        <li>36+ event channels supported</li>
+                        <li>Full event data preservation (XML, JSON)</li>
+                        <li>Automatic event categorization</li>
+                        <li>Process and command line extraction</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 12px;">
+                        <i class="fas fa-bell"></i> Threat Detection
+                    </h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary);">
+                        <li>Behavioral detection rules</li>
+                        <li>Sequence-based attack detection</li>
+                        <li>Threshold-based anomaly detection</li>
+                        <li>Pattern matching</li>
+                        <li>Entity correlation</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 12px;">
+                        <i class="fas fa-terminal"></i> PQL Query Language
+                    </h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary);">
+                        <li>Custom query syntax</li>
+                        <li>Message field search</li>
+                        <li>Time-based queries</li>
+                        <li>Aggregation functions</li>
+                        <li>Complex condition support</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 12px;">
+                        <i class="fas fa-robot"></i> Agent Management
+                    </h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary);">
+                        <li>Automatic agent registration</li>
+                        <li>Heartbeat monitoring</li>
+                        <li>Configurable collection intervals</li>
+                        <li>Batch event submission</li>
+                        <li>Multi-endpoint support</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 12px;">
+                        <i class="fas fa-shield-halved"></i> Security Analysis
+                    </h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary);">
+                        <li>MITRE ATT&CK mapping</li>
+                        <li>Alert correlation</li>
+                        <li>Event timeline analysis</li>
+                        <li>User and entity tracking</li>
+                        <li>Evidence collection</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 12px;">
+                        <i class="fas fa-database"></i> Data Management
+                    </h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary);">
+                        <li>Full event data retention</li>
+                        <li>Raw XML preservation</li>
+                        <li>JSON event data storage</li>
+                        <li>Efficient indexing</li>
+                        <li>Fast query performance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Channels -->
+    <div id="event-channels" class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <h2 class="card-title">3. Event Channels</h2>
+        </div>
+        <div class="card-body">
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                Dark Knight Phantom SIEM collects events from the following Windows Event Log channels:
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+                <div>
+                    <h3 style="color: var(--accent-purple); margin-bottom: 8px;">Core Windows Logs</h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary); font-size: 14px;">
+                        <li>Security</li>
+                        <li>System</li>
+                        <li>Application</li>
+                        <li>Setup</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-purple); margin-bottom: 8px;">Active Directory</h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary); font-size: 14px;">
+                        <li>Directory Service</li>
+                        <li>DFS Replication</li>
+                        <li>DNS Server</li>
+                        <li>File Replication Service</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-purple); margin-bottom: 8px;">Security & Auditing</h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary); font-size: 14px;">
+                        <li>Microsoft-Windows-Security-Auditing</li>
+                        <li>Microsoft-Windows-AppLocker/EXE and DLL</li>
+                        <li>Microsoft-Windows-AppLocker/MSI and Script</li>
+                        <li>Microsoft-Windows-Windows Defender/Operational</li>
+                        <li>Microsoft-Windows-Windows Firewall With Advanced Security/Firewall</li>
+                        <li>Microsoft-Windows-CodeIntegrity/Operational</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-purple); margin-bottom: 8px;">PowerShell</h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary); font-size: 14px;">
+                        <li>Microsoft-Windows-PowerShell/Operational</li>
+                        <li>PowerShellCore/Operational</li>
+                        <li>Windows PowerShell</li>
+                    </ul>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        <strong>Note:</strong> PowerShell logging must be enabled via Group Policy or Registry.
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-purple); margin-bottom: 8px;">Sysmon</h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary); font-size: 14px;">
+                        <li>Microsoft-Windows-Sysmon/Operational</li>
+                    </ul>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        <strong>Note:</strong> Requires Sysmon installation with configuration.
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-purple); margin-bottom: 8px;">Remote Access</h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary); font-size: 14px;">
+                        <li>Microsoft-Windows-TerminalServices-LocalSessionManager/Operational</li>
+                        <li>Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational</li>
+                        <li>Microsoft-Windows-RemoteDesktopServices-RdpCoreTS/Operational</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-purple); margin-bottom: 8px;">Networking</h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary); font-size: 14px;">
+                        <li>Microsoft-Windows-SMBClient/Security</li>
+                        <li>Microsoft-Windows-SMBServer/Security</li>
+                        <li>Microsoft-Windows-DNS-Client/Operational</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-purple); margin-bottom: 8px;">WMI & Scheduling</h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary); font-size: 14px;">
+                        <li>Microsoft-Windows-WMI-Activity/Operational</li>
+                        <li>Microsoft-Windows-TaskScheduler/Operational</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-purple); margin-bottom: 8px;">Authentication</h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary); font-size: 14px;">
+                        <li>Microsoft-Windows-Kerberos/Operational</li>
+                        <li>Microsoft-Windows-NTLM/Operational</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--accent-purple); margin-bottom: 8px;">Other Channels</h3>
+                    <ul style="line-height: 1.8; color: var(--text-secondary); font-size: 14px;">
+                        <li>Microsoft-Windows-CertificateServicesClient-Lifecycle-System/Operational</li>
+                        <li>Microsoft-Windows-LDAP-Client/Debug</li>
+                        <li>Microsoft-Windows-GroupPolicy/Operational</li>
+                        <li>Microsoft-Windows-Bits-Client/Operational</li>
+                        <li>Microsoft-Windows-WindowsUpdateClient/Operational</li>
+                        <li>Microsoft-Windows-PrintService/Operational</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event IDs -->
+    <div id="event-ids" class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <h2 class="card-title">4. Collected Event IDs</h2>
+        </div>
+        <div class="card-body">
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                The system prioritizes collection of the following critical security event IDs:
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Logon Events</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        4624, 4625, 4634, 4647, 4648, 4672, 4675
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        4624: Successful logon<br>
+                        4625: Failed logon<br>
+                        4648: Logon with explicit credentials
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Account Management</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        4720, 4722, 4723, 4724, 4725, 4726, 4727, 4728, 4729, 4730, 4731, 4732, 4733, 4734, 4735, 4737, 4738, 4740, 4741, 4742, 4743, 4754, 4755, 4756, 4757, 4758, 4764, 4765, 4766
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        4720: Account created<br>
+                        4728: Member added to security group<br>
+                        4740: Account locked out
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Process Events</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        4688, 4689, 4696, 4697
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        4688: Process created<br>
+                        4689: Process terminated<br>
+                        4697: Service installed
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Service Events</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        7045, 7034, 7035, 7036, 7040
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        7045: Service installed<br>
+                        7034: Service crashed
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Scheduled Tasks</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        4698, 4699, 4700, 4701, 4702
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        4698: Scheduled task created<br>
+                        4699: Scheduled task deleted
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Policy Changes</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        4704, 4705, 4706, 4707, 4713, 4714, 4715, 4716, 4717, 4718, 4719, 4739
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        4719: System audit policy changed<br>
+                        4739: Domain policy changed
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Object Access</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        4656, 4658, 4659, 4660, 4661, 4662, 4663, 4664, 4985
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        4662: Object access attempted<br>
+                        4663: Object access attempt failed
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Kerberos</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        4768, 4769, 4770, 4771, 4772, 4773, 4776
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        4768: Kerberos authentication ticket requested<br>
+                        4769: Kerberos service ticket requested
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Network Shares</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        5140, 5142, 5143, 5144, 5145, 5168
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        5140: Network share accessed<br>
+                        5145: Network share object checked
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Firewall</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        5156, 5157, 5158, 5159
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        5156: Firewall rule applied<br>
+                        5157: Firewall rule blocked connection
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Active Directory</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        5136, 5137, 5138, 5139, 5141
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        5136: Directory service object modified<br>
+                        5137: Directory service object created
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Audit Log</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        1102, 1100
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        1102: Audit log cleared<br>
+                        1100: Event log service shutdown
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Sysmon Events</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        1-26 (All Sysmon event types)
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        Event 1: Process creation<br>
+                        Event 3: Network connection<br>
+                        Event 7: Image loaded
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">Windows Defender</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        1006, 1007, 1008, 1116, 1117, 5001
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        1006: Malware detected<br>
+                        1007: Malware action taken
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--status-critical); margin-bottom: 12px;">PowerShell</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                        4103, 4104, 4105, 4106
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        4103: PowerShell command executed<br>
+                        4104: PowerShell script block logged<br>
+                        4105: PowerShell script block execution started
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PQL Documentation -->
+    <div id="pql" class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <h2 class="card-title">5. PQL (Phantom Query Language)</h2>
+        </div>
+        <div class="card-body">
+            <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 16px;">
+                PQL is a custom query language designed for security event analysis. It provides powerful search, aggregation, 
+                and filtering capabilities with an intuitive syntax.
+            </p>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Basic Syntax</h3>
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <code style="color: var(--accent-cyan); font-size: 14px;">
+                    SEARCH events [WHERE conditions] [ORDER BY field [ASC|DESC]] [LIMIT n]
+                </code>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">SEARCH Command</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">Search for events matching specific criteria:</p>
+            
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Basic Search:</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    SEARCH events LIMIT 10
+                </code>
+            </div>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Filter by Event ID:</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    SEARCH events WHERE event_id = 4625 LIMIT 20
+                </code>
+            </div>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Filter by Channel:</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    SEARCH events WHERE channel = Security LIMIT 50
+                </code>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Message Field Search</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">
+                Search across message, raw_xml, event_data, and full_text fields:
+            </p>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Search in Messages:</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    SEARCH events WHERE message CONTAINS failed LIMIT 50
+                </code>
+            </div>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Search for PowerShell Activity:</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    SEARCH events WHERE message CONTAINS powershell LIMIT 50
+                </code>
+            </div>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Combined Search:</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    SEARCH events WHERE message CONTAINS logon AND event_id = 4625 LIMIT 50
+                </code>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Time-Based Queries</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">Query events within specific time ranges:</p>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Last Hour:</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    SEARCH events WHERE timestamp >= 1h LIMIT 50
+                </code>
+            </div>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Last 24 Hours:</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    SEARCH events WHERE timestamp >= 24h LIMIT 100
+                </code>
+            </div>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Last 7 Days:</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    SEARCH events WHERE timestamp >= 7d LIMIT 200
+                </code>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">AGGREGATE Command</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">Group and count events by field:</p>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Count by Hostname:</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    AGGREGATE events BY hostname COUNT LIMIT 20
+                </code>
+            </div>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Count by Source IP:</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    AGGREGATE events BY source_ip COUNT LIMIT 20
+                </code>
+            </div>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Count by Channel:</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    AGGREGATE events BY channel COUNT
+                </code>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">AGGREGATE with Time Windows</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">Aggregate events within a time window:</p>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Failed Logons by IP (Last Hour):</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    AGGREGATE events BY source_ip COUNT WHERE event_id = 4625 WITHIN 1h
+                </code>
+            </div>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <div style="color: var(--accent-cyan); font-family: monospace; font-size: 13px; margin-bottom: 8px;">
+                    <strong>Events by Hostname (Last 24 Hours):</strong>
+                </div>
+                <code style="color: var(--text-primary); font-size: 13px;">
+                    AGGREGATE events BY hostname COUNT WITHIN 24h LIMIT 20
+                </code>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Operators</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px;">
+                    <div style="color: var(--accent-cyan); font-weight: bold; margin-bottom: 4px;">Comparison</div>
+                    <code style="font-size: 12px;">=, !=, >, >=, <, <=</code>
+                </div>
+                <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px;">
+                    <div style="color: var(--accent-cyan); font-weight: bold; margin-bottom: 4px;">Text Search</div>
+                    <code style="font-size: 12px;">CONTAINS, LIKE</code>
+                </div>
+                <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px;">
+                    <div style="color: var(--accent-cyan); font-weight: bold; margin-bottom: 4px;">Logical</div>
+                    <code style="font-size: 12px;">AND, OR, NOT</code>
+                </div>
+                <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px;">
+                    <div style="color: var(--accent-cyan); font-weight: bold; margin-bottom: 4px;">Membership</div>
+                    <code style="font-size: 12px;">IN</code>
+                </div>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Supported Fields</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-size: 13px;">
+                    <strong style="color: var(--accent-cyan);">Event Info:</strong><br>
+                    event_id, timestamp, channel, hostname
+                </div>
+                <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-size: 13px;">
+                    <strong style="color: var(--accent-cyan);">User Info:</strong><br>
+                    user_name, target_user_name, user_domain
+                </div>
+                <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-size: 13px;">
+                    <strong style="color: var(--accent-cyan);">Process Info:</strong><br>
+                    process_name, process_path, command_line
+                </div>
+                <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-size: 13px;">
+                    <strong style="color: var(--accent-cyan);">Network Info:</strong><br>
+                    source_ip, destination_ip, source_port
+                </div>
+                <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-size: 13px;">
+                    <strong style="color: var(--accent-cyan);">Content:</strong><br>
+                    message, raw_xml, event_data
+                </div>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Time Format</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">Relative time expressions:</p>
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; font-family: monospace; font-size: 13px;">
+                <div style="margin-bottom: 8px;"><code>1h</code> - 1 hour ago</div>
+                <div style="margin-bottom: 8px;"><code>24h</code> - 24 hours ago</div>
+                <div style="margin-bottom: 8px;"><code>7d</code> - 7 days ago</div>
+                <div style="margin-bottom: 8px;"><code>30m</code> - 30 minutes ago</div>
+                <div><code>NOW</code> - Current time</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detection Rules -->
+    <div id="detection" class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <h2 class="card-title">6. Detection Rules</h2>
+        </div>
+        <div class="card-body">
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                Dark Knight Phantom SIEM includes built-in detection rules that identify various security threats. 
+                Rules are mapped to MITRE ATT&CK framework techniques.
+            </p>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Rule Types</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; border-left: 4px solid var(--accent-purple);">
+                    <h4 style="color: var(--accent-cyan); margin-bottom: 8px;">THRESHOLD</h4>
+                    <p style="font-size: 13px; color: var(--text-secondary);">
+                        Detects when event count exceeds a threshold within a time window.
+                    </p>
+                </div>
+                <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; border-left: 4px solid var(--accent-blue);">
+                    <h4 style="color: var(--accent-cyan); margin-bottom: 8px;">SEQUENCE</h4>
+                    <p style="font-size: 13px; color: var(--text-secondary);">
+                        Detects when events occur in a specific order (e.g., failed logons then success).
+                    </p>
+                </div>
+                <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; border-left: 4px solid var(--status-high);">
+                    <h4 style="color: var(--accent-cyan); margin-bottom: 8px;">PATTERN</h4>
+                    <p style="font-size: 13px; color: var(--text-secondary);">
+                        Detects specific patterns in event data (e.g., suspicious file paths).
+                    </p>
+                </div>
+                <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; border-left: 4px solid var(--status-medium);">
+                    <h4 style="color: var(--accent-cyan); margin-bottom: 8px;">CORRELATION</h4>
+                    <p style="font-size: 13px; color: var(--text-secondary);">
+                        Correlates multiple related events to identify complex attack patterns.
+                    </p>
+                </div>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Built-in Detection Rules</h3>
+
+            <div style="margin-bottom: 20px;">
+                <h4 style="color: var(--status-critical); margin-bottom: 8px;">Authentication Attacks</h4>
+                <ul style="line-height: 1.8; color: var(--text-secondary);">
+                    <li><strong>Brute Force Attack:</strong> Multiple failed logons followed by success (T1110.001)</li>
+                    <li><strong>Password Spray Attack:</strong> Failed logons from one IP against multiple users (T1110.003)</li>
+                    <li><strong>Mass Account Lockouts:</strong> Multiple account lockouts in short time (T1110)</li>
+                </ul>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <h4 style="color: var(--status-critical); margin-bottom: 8px;">Privilege Escalation</h4>
+                <ul style="line-height: 1.8; color: var(--text-secondary);">
+                    <li><strong>User Added to Privileged Group:</strong> User added to Domain Admins, Administrators, etc. (T1078.002)</li>
+                    <li><strong>New Account Created and Added to Admins:</strong> Account creation and privilege assignment (T1136)</li>
+                </ul>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <h4 style="color: var(--status-critical); margin-bottom: 8px;">Lateral Movement</h4>
+                <ul style="line-height: 1.8; color: var(--text-secondary);">
+                    <li><strong>Lateral Movement via RDP:</strong> User connecting to multiple hosts via RDP (T1021.001)</li>
+                    <li><strong>Pass-the-Hash Detection:</strong> NTLM authentication with NewCredentials (T1550.002)</li>
+                    <li><strong>Excessive SMB Share Access:</strong> Multiple SMB share accesses from single source (T1021.002)</li>
+                </ul>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <h4 style="color: var(--status-critical); margin-bottom: 8px;">Persistence</h4>
+                <ul style="line-height: 1.8; color: var(--text-secondary);">
+                    <li><strong>Suspicious Service Installation:</strong> Services installed from temp/user paths (T1543.003)</li>
+                    <li><strong>Suspicious Scheduled Task:</strong> Tasks created in suspicious locations (T1053.005)</li>
+                </ul>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <h4 style="color: var(--status-critical); margin-bottom: 8px;">Defense Evasion</h4>
+                <ul style="line-height: 1.8; color: var(--text-secondary);">
+                    <li><strong>Suspicious PowerShell Execution:</strong> Encoded commands, bypass flags, downloads (T1059.001)</li>
+                    <li><strong>Audit Log Cleared:</strong> Security audit log cleared (T1070.001)</li>
+                </ul>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Entity Tracking</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">
+                The detection engine tracks entities (users, IPs, hosts) to identify behavioral anomalies:
+            </p>
+            <ul style="line-height: 1.8; color: var(--text-secondary);">
+                <li>User activity patterns</li>
+                <li>Source IP behavior</li>
+                <li>Hostname activity</li>
+                <li>Unique value tracking (e.g., unique users per IP)</li>
+                <li>Event sequence tracking</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- API Endpoints -->
+    <div id="api" class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <h2 class="card-title">7. API Endpoints</h2>
+        </div>
+        <div class="card-body">
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                RESTful API endpoints for programmatic access:
+            </p>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Events</h3>
+            <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-family: monospace; font-size: 13px;">
+                <div style="color: var(--accent-cyan); margin-bottom: 4px;">GET /api/v1/events/list/</div>
+                <div style="color: var(--text-secondary); font-size: 12px;">List events with filtering</div>
+            </div>
+            <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-family: monospace; font-size: 13px;">
+                <div style="color: var(--accent-cyan); margin-bottom: 4px;">GET /api/v1/events/list/{id}/</div>
+                <div style="color: var(--text-secondary); font-size: 12px;">Get specific event details</div>
+            </div>
+            <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-family: monospace; font-size: 13px;">
+                <div style="color: var(--accent-cyan); margin-bottom: 4px;">POST /api/v1/events/ingest/</div>
+                <div style="color: var(--text-secondary); font-size: 12px;">Ingest events from agents</div>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Agents</h3>
+            <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-family: monospace; font-size: 13px;">
+                <div style="color: var(--accent-cyan); margin-bottom: 4px;">POST /api/v1/agents/register/</div>
+                <div style="color: var(--text-secondary); font-size: 12px;">Register new agent</div>
+            </div>
+            <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-family: monospace; font-size: 13px;">
+                <div style="color: var(--accent-cyan); margin-bottom: 4px;">POST /api/v1/agents/heartbeat/</div>
+                <div style="color: var(--text-secondary); font-size: 12px;">Agent heartbeat</div>
+            </div>
+            <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-family: monospace; font-size: 13px;">
+                <div style="color: var(--accent-cyan); margin-bottom: 4px;">GET /api/v1/agents/list/</div>
+                <div style="color: var(--text-secondary); font-size: 12px;">List all agents</div>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">PQL Query</h3>
+            <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-family: monospace; font-size: 13px;">
+                <div style="color: var(--accent-cyan); margin-bottom: 4px;">POST /api/v1/query/execute/</div>
+                <div style="color: var(--text-secondary); font-size: 12px;">Execute PQL query</div>
+                <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">
+                    Body: {"query": "SEARCH events LIMIT 10"}
+                </div>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Detection & Alerts</h3>
+            <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-family: monospace; font-size: 13px;">
+                <div style="color: var(--accent-cyan); margin-bottom: 4px;">GET /api/v1/detection/alerts/</div>
+                <div style="color: var(--text-secondary); font-size: 12px;">List detection alerts</div>
+            </div>
+            <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-family: monospace; font-size: 13px;">
+                <div style="color: var(--accent-cyan); margin-bottom: 4px;">GET /api/v1/detection/rules/</div>
+                <div style="color: var(--text-secondary); font-size: 12px;">List detection rules</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration -->
+    <div id="configuration" class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <h2 class="card-title">8. Configuration</h2>
+        </div>
+        <div class="card-body">
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Agent Configuration</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">
+                Agent configuration is stored in <code style="background: var(--bg-dark); padding: 2px 6px; border-radius: 4px;">config.json</code> 
+                in the agent's executable directory. This file can be edited without recompiling:
+            </p>
+
+            <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; margin-bottom: 20px; font-family: monospace; font-size: 13px;">
+                <pre style="color: var(--text-primary); margin: 0; white-space: pre-wrap;">{
+  "AgentId": "phantom-rick-5e6790bf",
+  "ServerUrl": "http://localhost:8000/api/v1/",
+  "CollectionIntervalSeconds": 10,
+  "HeartbeatIntervalSeconds": 30,
+  "BatchSize": 500,
+  "MaxEventsPerBatch": 1000,
+  "CollectAllChannels": true,
+  "EnabledChannels": [...]
+}</pre>
+            </div>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Changing Server URL</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">
+                To change the server IP address or port, edit the <code>ServerUrl</code> field in <code>config.json</code>:
+            </p>
+            <ul style="line-height: 1.8; color: var(--text-secondary);">
+                <li>Local server: <code>http://localhost:8000/api/v1/</code></li>
+                <li>Remote IP: <code>http://192.168.1.100:8000/api/v1/</code></li>
+                <li>Different port: <code>http://localhost:9000/api/v1/</code></li>
+            </ul>
+            <p style="color: var(--text-secondary); margin-top: 12px;">
+                <strong>No recompilation needed!</strong> Just edit the JSON file and restart the agent.
+            </p>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">PowerShell Logging</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">
+                PowerShell logging must be enabled on Windows for PowerShell events to be collected:
+            </p>
+            <ol style="line-height: 1.8; color: var(--text-secondary);">
+                <li>Run <code>enable_powershell_logging.ps1</code> as Administrator</li>
+                <li>Or enable via Group Policy: Computer Configuration → Administrative Templates → Windows Components → Windows PowerShell</li>
+                <li>Enable "Turn on Module Logging" and "Turn on PowerShell Script Block Logging"</li>
+            </ol>
+
+            <h3 style="color: var(--accent-purple); margin-top: 24px; margin-bottom: 12px;">Sysmon Integration</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">
+                To collect Sysmon events:
+            </p>
+            <ol style="line-height: 1.8; color: var(--text-secondary);">
+                <li>Install Sysmon using <code>sysmon/install_sysmon.bat</code></li>
+                <li>Configuration file: <code>sysmon/sysmon-config.xml</code></li>
+                <li>Agent will automatically collect from <code>Microsoft-Windows-Sysmon/Operational</code> channel</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Quick Reference -->
+    <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+            <h2 class="card-title">Quick Reference</h2>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div>
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 12px;">Common Queries</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 12px; line-height: 1.8;">
+                        <div>Failed logons:</div>
+                        <code style="color: var(--accent-purple);">SEARCH events WHERE event_id = 4625 LIMIT 50</code>
+                        <div style="margin-top: 8px;">PowerShell activity:</div>
+                        <code style="color: var(--accent-purple);">SEARCH events WHERE message CONTAINS powershell LIMIT 50</code>
+                        <div style="margin-top: 8px;">Recent events:</div>
+                        <code style="color: var(--accent-purple);">SEARCH events WHERE timestamp >= 1h LIMIT 50</code>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 12px;">Useful Aggregations</h3>
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 12px; line-height: 1.8;">
+                        <div>Failed logons by IP:</div>
+                        <code style="color: var(--accent-purple);">AGGREGATE events BY source_ip COUNT WHERE event_id = 4625 WITHIN 1h</code>
+                        <div style="margin-top: 8px;">Events by channel:</div>
+                        <code style="color: var(--accent-purple);">AGGREGATE events BY channel COUNT</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        scroll-margin-top: 80px;
+    }
+    code {
+        background: var(--bg-dark);
+        padding: 2px 6px;
+        border-radius: 4px;
+        color: var(--accent-cyan);
+    }
+    a[href^="#"] {
+        transition: all 0.2s ease;
+    }
+    a[href^="#"]:hover {
+        background: var(--bg-card-hover);
+        padding-left: 12px;
+    }
+</style>
+{% endblock %}
+

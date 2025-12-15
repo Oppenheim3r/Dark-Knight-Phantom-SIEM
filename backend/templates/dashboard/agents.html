@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Agents - Dark Knight Phantom SIEM{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Phantom Agents</h1>
+        <p class="page-subtitle">Monitor and manage endpoint agents</p>
+    </div>
+</div>
+
+<!-- Agents Grid -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Registered Agents</h3>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" onclick="testAgentAPI()">
+                <i class="fas fa-vial"></i> Test API
+            </button>
+            <button class="btn btn-secondary" onclick="loadAgents()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="agents-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+            <div style="text-align: center; color: var(--text-muted); padding: 40px;">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 10px;">Loading agents...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function loadAgents() {
+        try {
+            // Get agents list
+            const agentsResponse = await fetch(`${API_BASE}/agents/list/`);
+            if (!agentsResponse.ok) {
+                throw new Error(`Agents list API error: ${agentsResponse.status}`);
+            }
+            const agentsData = await agentsResponse.json();
+            console.log('Agents response:', agentsData);
+            
+            // Handle paginated response or direct array
+            const agents = Array.isArray(agentsData) ? agentsData : (agentsData.results || []);
+            
+            const grid = document.getElementById('agents-grid');
+            
+            if (agents.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px; color: var(--text-muted);">
+                        <i class="fas fa-robot" style="font-size: 48px; margin-bottom: 16px; color: var(--border-color);"></i>
+                        <h3 style="margin-bottom: 8px;">No Agents Registered</h3>
+                        <p style="margin-bottom: 20px;">Deploy the Phantom Agent on your Windows endpoints to start collecting events.</p>
+                        <div style="background: var(--bg-dark); padding: 20px; border-radius: 8px; text-align: left; max-width: 600px; margin: 0 auto;">
+                            <h4 style="color: var(--accent-purple); margin-bottom: 10px;">Agent Setup Instructions:</h4>
+                            <ol style="text-align: left; color: var(--text-secondary); font-size: 13px; line-height: 1.8;">
+                                <li>Make sure Django server is running on <code>http://localhost:8000</code></li>
+                                <li>Run the Phantom Agent executable</li>
+                                <li>Agent will register at: <code>/api/v1/agents/register/</code></li>
+                                <li>Agent will send heartbeats every 30 seconds</li>
+                                <li>Check agent logs in <code>agent/PhantomAgent/logs/</code></li>
+                            </ol>
+                            <p style="margin-top: 15px; font-size: 12px; color: var(--text-muted);">
+                                <strong>Agent Config:</strong> Make sure <code>ServerUrl</code> in agent config.json is set to <code>http://localhost:8000/api/v1/</code>
+                            </p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            agents.forEach(agent => {
+                const isOnline = agent.is_online || agent.status === 'ONLINE';
+                const statusClass = isOnline ? 'online' : 'offline';
+                const lastHeartbeat = agent.last_heartbeat ? new Date(agent.last_heartbeat).toLocaleString() : 'Never';
+                const roleIcon = agent.is_domain_controller ? 'fa-crown' : 'fa-desktop';
+                
+                html += `
+                    <div class="agent-card" onclick="showAgentDetails('${agent.id}')" style="cursor: pointer;">
+                        <div class="agent-header">
+                            <div class="agent-status-icon ${statusClass}">
+                                <i class="fas ${roleIcon}"></i>
+                            </div>
+                            <div>
+                                <div class="agent-name">${agent.hostname}</div>
+                                <div class="agent-ip">${agent.ip_address}</div>
+                            </div>
+                            <span class="status-dot ${statusClass}" style="margin-left: auto;"></span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+                            <i class="fas fa-clock" style="margin-right: 4px;"></i> ${lastHeartbeat}
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <span class="severity-badge info">${agent.os_type || 'Windows'}</span>
+                            <span class="severity-badge low">${agent.server_role || 'Workstation'}</span>
+                            ${agent.is_domain_controller ? '<span class="severity-badge medium">DC</span>' : ''}
+                        </div>
+                        <div class="agent-stats">
+                            <div class="agent-stat">
+                                <div class="agent-stat-value">${(agent.events_sent_today || 0).toLocaleString()}</div>
+                                <div class="agent-stat-label">Events Today</div>
+                            </div>
+                            <div class="agent-stat">
+                                <div class="agent-stat-value">v${agent.agent_version || '1.0'}</div>
+                                <div class="agent-stat-label">Version</div>
+                            </div>
+                            <div class="agent-stat">
+                                <div class="agent-stat-value" style="color: ${isOnline ? 'var(--status-low)' : 'var(--status-critical)'};">
+                                    ${isOnline ? 'Online' : 'Offline'}
+                                </div>
+                                <div class="agent-stat-label">Status</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            grid.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Error loading agents:', error);
+            const grid = document.getElementById('agents-grid');
+            if (grid) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; color: var(--status-critical); padding: 40px;">
+                        <h4>Error loading agents</h4>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">
+                            ${error.message}<br>
+                            <br>Check browser console (F12) for details.<br>
+                            <br>Make sure:<br>
+                            1. Django server is running<br>
+                            2. Database is connected<br>
+                            3. Agent has registered at /api/v1/agents/register/
+                        </p>
+                    </div>
+                `;
+            }
+        }
+    }
+    
+    async function testAgentAPI() {
+        const results = {
+            statistics: false,
+            list: false,
+            register: false,
+        };
+        
+        try {
+            // Test statistics endpoint
+            const statsRes = await fetch(`${API_BASE}/agents/list/statistics/`);
+            results.statistics = statsRes.ok;
+            console.log('Statistics endpoint:', statsRes.ok ? 'OK' : `FAILED (${statsRes.status})`);
+            
+            // Test list endpoint
+            const listRes = await fetch(`${API_BASE}/agents/list/`);
+            results.list = listRes.ok;
+            console.log('List endpoint:', listRes.ok ? 'OK' : `FAILED (${listRes.status})`);
+            
+            // Test register endpoint (should return 400 without data, but endpoint exists)
+            const registerRes = await fetch(`${API_BASE}/agents/register/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+            // 400 is OK - means endpoint exists, just needs valid data
+            results.register = registerRes.status === 400 || registerRes.ok;
+            console.log('Register endpoint:', results.register ? 'OK' : `FAILED (${registerRes.status})`);
+            
+            alert(`API Test Results:\n\nStatistics: ${results.statistics ? '✓' : '✗'}\nList: ${results.list ? '✓' : '✗'}\nRegister: ${results.register ? '✓' : '✗'}\n\nCheck console (F12) for details.`);
+        } catch (error) {
+            console.error('API test error:', error);
+            alert(`API Test Error: ${error.message}\n\nMake sure Django server is running on http://localhost:8000`);
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadAgents);
+    setInterval(loadAgents, 30000);
+</script>
+{% endblock %}
+
